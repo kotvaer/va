@@ -1,0 +1,6 @@
+interface:
+  display_name: "VA — Voice Analysis"
+  short_description: "本地转写并分析面试、会议、访谈、讨论及其他语音内容"
+  default_prompt: "使用 $va 转写并分析本地录音，区分说话人并按内容场景生成带时间戳的结构化结果。"
+policy:
+  allow_implicit_invocation: true

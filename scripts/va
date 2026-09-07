@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+project_dir="$script_dir/voice2structure"
+runtime_root="${VA_RUNTIME_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/va}"
+runtime_env="$runtime_root/venv"
+model_cache="${MODELSCOPE_CACHE:-$HOME/.cache/modelscope/models}"
+
+check_command() {
+    if command -v "$1" >/dev/null 2>&1; then
+        printf '%s: %s\n' "$1" "$(command -v "$1")"
+        return 0
+    fi
+    printf '%s: missing\n' "$1" >&2
+    return 1
+}
+
+if [ "${1:-}" = "doctor" ]; then
+    result=0
+    printf 'VA skill: %s\n' "$script_dir"
+    printf 'Embedded project: %s\n' "$project_dir"
+    printf 'Runtime environment: %s\n' "$runtime_env"
+    printf 'Model cache: %s\n' "$model_cache"
+    test -f "$project_dir/pyproject.toml" || result=1
+    check_command uv || result=1
+    check_command ffmpeg || result=1
+    check_command ffprobe || result=1
+    if [ -d "$model_cache" ]; then
+        printf 'Model cache status: present\n'
+    else
+        printf 'Model cache status: not downloaded yet\n'
+    fi
+    exit "$result"
+fi
+
+for required_command in uv ffmpeg ffprobe; do
+    if ! command -v "$required_command" >/dev/null 2>&1; then
+        printf 'VA requires %s. Install it before processing audio.\n' "$required_command" >&2
+        exit 1
+    fi
+done
+
+mkdir -p "$runtime_root"
+export UV_PROJECT_ENVIRONMENT="$runtime_env"
+export PYTHONDONTWRITEBYTECODE=1
+exec uv run --project "$project_dir" voice2structure "$@"

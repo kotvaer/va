@@ -1,0 +1,18 @@
+.DS_Store
+.env
+*.log
+*.py[cod]
+**/__pycache__/
+**/.pytest_cache/
+scripts/voice2structure/.venv/
+
+# Private source material and generated artifacts
+*.m4a
+*.mp3
+*.wav
+*.aac
+*.flac
+*.mp4
+outputs/
+work/
+analysis.codex.md
